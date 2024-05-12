@@ -26,37 +26,37 @@ namespace Game
             }
         }
 
-        public List<SoundData> soundDatas = new List<SoundData>();
-        [SerializeField] List<CreatedSound> audioSources = new List<CreatedSound>();
+        public List<SoundData> SoundDatas = new List<SoundData>();
+        [SerializeField] private List<CreatedSound> audioSources = new List<CreatedSound>();
 
         [System.Serializable]
         protected class CreatedSound
         {
-            public Sound soundType;
-            public AudioSource soundSource;
-            [HideInInspector] public SoundData soundData;
+            public Sound SoundType;
+            public AudioSource SoundSource;
+            [HideInInspector] public SoundData SoundData;
 
             public CreatedSound(SoundData s)
             {
-                soundData = s;
+                SoundData = s;
                 GameObject obj = new GameObject("New Sound", typeof(AudioSource));
                 obj.transform.parent = Camera.main.transform;
-                soundSource = obj.GetComponent<AudioSource>();
-                soundType = s.soundType;
+                SoundSource = obj.GetComponent<AudioSource>();
+                SoundType = s.soundType;
                 UpdateVariables();
 
             }
             public void UpdateVariables()
             {
-                soundSource.loop = soundData.loop;
-                soundSource.playOnAwake = soundData.playOnAwake;
-                soundSource.clip = soundData.Clip;
-                soundSource.priority = soundData.priorty;
-                soundSource.volume = soundData.volume;
-                soundSource.pitch = soundData.pitch;
-                soundSource.panStereo = soundData.streoPan;
-                soundSource.spatialBlend = soundData.spatialBlend;
-                soundSource.reverbZoneMix = soundData.reverbZoneMix;
+                SoundSource.loop = SoundData.loop;
+                SoundSource.playOnAwake = SoundData.playOnAwake;
+                SoundSource.clip = SoundData.Clip;
+                SoundSource.priority = SoundData.priorty;
+                SoundSource.volume = SoundData.volume;
+                SoundSource.pitch = SoundData.pitch;
+                SoundSource.panStereo = SoundData.streoPan;
+                SoundSource.spatialBlend = SoundData.spatialBlend;
+                SoundSource.reverbZoneMix = SoundData.reverbZoneMix;
             }
         }
 
@@ -75,14 +75,14 @@ namespace Game
         private void Start()
         {
             SoundData[] soundDataArray = Resources.LoadAll<SoundData>("Sounds");
-            soundDatas.AddRange(soundDataArray);
-            if (soundDatas.Count > 0)
+            SoundDatas.AddRange(soundDataArray);
+            if (SoundDatas.Count > 0)
             {
-                for (int i = 0; i < soundDatas.Count; i++)
+                for (int i = 0; i < SoundDatas.Count; i++)
                 {
-                    SoundData s = soundDatas[i];
+                    SoundData s = SoundDatas[i];
                     CreatedSound createdSound = new CreatedSound(s);
-                    createdSound.soundSource.gameObject.name = s.name;
+                    createdSound.SoundSource.gameObject.name = s.name;
                     audioSources.Add(createdSound);
                 }
             }
@@ -93,14 +93,14 @@ namespace Game
             if (Instance != null)
             {
                 // Find the SoundData with the specified soundType
-                CreatedSound sound = Instance.audioSources.FirstOrDefault(x => x.soundType == soundType);
+                CreatedSound sound = Instance.audioSources.FirstOrDefault(x => x.SoundType == soundType);
 
                 // Check if the soundData is not null and the associated AudioSource is not null
-                if (sound != null && sound.soundSource != null)
+                if (sound != null && sound.SoundSource != null)
                 {
 
                     sound.UpdateVariables();
-                    sound.soundSource.Play();
+                    sound.SoundSource.Play();
                 }
                 else
                 {
@@ -117,12 +117,12 @@ namespace Game
             if (Instance != null)
             {
                 // Find the SoundData with the specified soundType
-                CreatedSound sound = Instance.audioSources.FirstOrDefault(x => x.soundType == soundType);
+                CreatedSound sound = Instance.audioSources.FirstOrDefault(x => x.SoundType == soundType);
 
                 // Check if the soundData is not null and the associated AudioSource is not null
-                if (sound != null && sound.soundSource != null)
+                if (sound != null && sound.SoundSource != null)
                 {
-                    sound.soundSource.Stop();
+                    sound.SoundSource.Stop();
                 }
                 else
                 {
@@ -142,7 +142,7 @@ namespace Game
                 if (sounds.Count == 0) return;
                 foreach (CreatedSound c in sounds)
                 {
-                    c.soundSource.mute = !status;
+                    c.SoundSource.mute = !status;
                 }
             }
             else
@@ -157,10 +157,10 @@ namespace Game
             {
                 List<CreatedSound> sounds = Instance.audioSources;
                 if (sounds.Count == 0) return;
-                CreatedSound c = sounds.FirstOrDefault(x => x.soundType == sound);
+                CreatedSound c = sounds.FirstOrDefault(x => x.SoundType == sound);
                 if (c != null)
                 {
-                    c.soundSource.mute = status;
+                    c.SoundSource.mute = status;
                 }
             }
             else
