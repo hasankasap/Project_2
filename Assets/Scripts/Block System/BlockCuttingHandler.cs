@@ -7,11 +7,6 @@ namespace Game.BlockSystem
 {
     public class BlockCuttingHandler : MonoBehaviour
     {
-        public class CuttingInfo
-        {
-            public Vector3 MainLeft, MainRight;
-            public Vector3 PrevLeft, PrevRight;
-        }
         private void OnEnable()
         {
             EventManager.StartListening(GameEvents.CUT_BLOCK, OnCut);
@@ -23,32 +18,13 @@ namespace Game.BlockSystem
         private void OnCut(object[] obj)
         {
             MovingBlock movingBlock = (MovingBlock)obj[0];
-            CuttingInfo blockCuttingInfo = (CuttingInfo)obj[1];
+            BlocksEdges blockCuttingInfo = (BlocksEdges)obj[1];
             if (movingBlock == null || blockCuttingInfo == null) return;
 
             CutBlock(movingBlock, blockCuttingInfo);
         }
 
-        [SerializeField] List<MovingBlock> movingBlocks = new List<MovingBlock>();
-        int count = 1;
-        private void Update()
-        {
-            if (Input.GetMouseButtonDown(0) && count < movingBlocks.Count)
-            {
-                CuttingInfo cuttingInfo = new CuttingInfo();
-                movingBlocks[count - 1].Center = movingBlocks[count - 1].transform.position;
-                cuttingInfo.PrevLeft = movingBlocks[count - 1].Center - (Vector3.right * (movingBlocks[count - 1].Width / 2));
-                cuttingInfo.PrevRight = movingBlocks[count - 1].Center + (Vector3.right * (movingBlocks[count - 1].Width / 2));
-                movingBlocks[count].Center = movingBlocks[count].transform.position;
-                cuttingInfo.MainLeft = movingBlocks[count].Center - (Vector3.right * (movingBlocks[count].Width / 2));
-                cuttingInfo.MainRight = movingBlocks[count].Center + (Vector3.right * (movingBlocks[count].Width / 2));
-                movingBlocks[count].Center = movingBlocks[count].transform.position;
-
-                CutBlock(movingBlocks[count], cuttingInfo);
-                count++;
-            }
-        }
-        private void CutBlock(MovingBlock movingBlock, CuttingInfo blockCuttingInfo)
+        private void CutBlock(MovingBlock movingBlock, BlocksEdges blockCuttingInfo)
         {
             Vector3 newMainLeft = blockCuttingInfo.MainLeft.x <= blockCuttingInfo.PrevLeft.x ? blockCuttingInfo.PrevLeft : blockCuttingInfo.MainLeft;
             Vector3 newMainRight = blockCuttingInfo.MainRight.x >= blockCuttingInfo.PrevRight.x ? blockCuttingInfo.PrevRight : blockCuttingInfo.MainRight;

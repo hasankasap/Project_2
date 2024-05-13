@@ -20,11 +20,13 @@ namespace Game.BlockSystem
             Vector3 tmpScale = blockModel.transform.localScale;
             tmpScale.x = targetWidth;
             tmpScale.z = targetLenth;
+            Width = targetLenth;
+            Length = targetLenth;
             blockModel.transform.localScale = tmpScale;
             Center = transform.position;
         }
 
-        public void Move(float start, float end, float movementSpeed)
+        public void MoveX(float start, float end, float movementSpeed)
         {
             Vector3 oldPos = transform.position;
             oldPos.x = start;
