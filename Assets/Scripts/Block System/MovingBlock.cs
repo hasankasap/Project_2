@@ -10,19 +10,25 @@ namespace Game.BlockSystem
         public float Width, Length;
         public Vector3 Center;
         public Material BlockMat;
+        public MovingBlock nextBlock;
 
         private Tween movementTween;
         [SerializeField] private GameObject blockModel;
         [SerializeField] private Renderer blockRenderer;
+        [SerializeField] private BoxCollider jumpTrigger;
 
         public void Initialize(float targetWidth, float targetLenth)
         {
             Vector3 tmpScale = blockModel.transform.localScale;
             tmpScale.x = targetWidth;
             tmpScale.z = targetLenth;
-            Width = targetLenth;
+            Width = targetWidth;
             Length = targetLenth;
             blockModel.transform.localScale = tmpScale;
+            tmpScale.z = targetLenth * .1f;
+            jumpTrigger.size = tmpScale;
+            Vector3 colCenter = jumpTrigger.center;
+            colCenter.z = targetLenth - .1f;
             Center = transform.position;
         }
 
@@ -31,7 +37,11 @@ namespace Game.BlockSystem
             Vector3 oldPos = transform.position;
             oldPos.x = start;
             transform.position = oldPos;
-            movementTween = transform.DOMoveX(end, movementSpeed).SetLoops(-1, LoopType.Yoyo).SetSpeedBased(true);
+            movementTween = transform.DOMoveX(end, movementSpeed).SetLoops(-1, LoopType.Yoyo).SetSpeedBased(true).SetEase(Ease.Linear);
+        }
+        public void ChangeColliderActive(bool status)
+        {
+            jumpTrigger.enabled = status;
         }
         public void StopMovement()
         {

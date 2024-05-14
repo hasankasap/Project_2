@@ -8,6 +8,7 @@ namespace Game.BlockSystem
     {
         [SerializeField] private MovingBlockInitSettings blockSettings;
         MovingBlock currentBlock, prevBlock;
+        bool first = true;
 
         enum MatchingCondition
         {
@@ -33,6 +34,11 @@ namespace Game.BlockSystem
             BlocksEdges blocksEdges = new BlocksEdges(currentBlock, prevBlock);
             MatchingCondition condition = GetBlockMatchingType(blocksEdges);
             currentBlock.StopMovement();
+            if (first)
+            {
+                EventManager.TriggerEvent(GameEvents.START_MOVEMENT, null);
+                first = false;
+            }
             switch (condition)
             {
                 case MatchingCondition.Perfect:
@@ -40,6 +46,7 @@ namespace Game.BlockSystem
                     CallNewBlock();
                     break;
                 case MatchingCondition.Inside:
+                    prevBlock.nextBlock = currentBlock;
                     EventManager.TriggerEvent(GameEvents.CUT_BLOCK, new object[] { currentBlock, blocksEdges });
                     CallNewBlock();
                     break;
@@ -53,15 +60,18 @@ namespace Game.BlockSystem
         {
             currentBlock = FindObjectOfType<MovingBlock>();
             currentBlock.Initialize(blockSettings.BlockWidth, blockSettings.BlockLength);
+            currentBlock.ChangeColliderActive(true);
+            CallNewBlock();
         }
         private void CallNewBlock()
         {
             MovingBlock newBlock = BlockPool.Instance.GetPooledBlock(blockSettings.BlockMaterials[levelBlockCount % blockSettings.BlockMaterials.Length]);
+            newBlock.ChangeColliderActive(true);
             newBlock.SetWidth(currentBlock.Width);
             Vector3 pos = currentBlock.transform.position;
             pos.z += currentBlock.Length;
             pos.x += (blockSettings.BlockWidth * 1.5f) * (Mathf.Pow(-1, levelBlockCount));
-            float targetX = pos.x + ((blockSettings.BlockWidth * 3f) * (Mathf.Pow(-1, levelBlockCount)));
+            float targetX = pos.x + ((blockSettings.BlockWidth * 3f) * (Mathf.Pow(-1, levelBlockCount + 1)));
             newBlock.transform.position = pos;
             prevBlock = currentBlock;
             currentBlock = newBlock;
@@ -85,12 +95,14 @@ namespace Game.BlockSystem
                 Debug.LogError("Block referances missing please debug!!");
                 return MatchingCondition.Outside;
             }
-            
-            if (Vector3.Distance(blocksEdges.MainLeft, blocksEdges.PrevLeft) <= blockSettings.PerfectMatchingThreshold)
+            float dist = Mathf.Abs(blocksEdges.MainLeft.x - blocksEdges.PrevLeft.x);
+            float insideDist = (currentBlock.Width * (1 - blockSettings.PerfectMatchingThreshold));
+            float perfectThreshold = currentBlock.Width * blockSettings.PerfectMatchingThreshold;
+            if (dist <= perfectThreshold)
             {
-
+                return MatchingCondition.Perfect;
             }
-            else if (Vector3.Distance(blocksEdges.MainLeft, blocksEdges.PrevLeft) < (currentBlock.Width * (1 - blockSettings.PerfectMatchingThreshold)) && blocksEdges.MainLeft.x > blocksEdges.PrevLeft.x)
+            else if (dist < insideDist && (blocksEdges.MainLeft.x > blocksEdges.PrevLeft.x || blocksEdges.MainRight.x < blocksEdges.PrevRight.x))
             {
                 return MatchingCondition.Inside;
             }

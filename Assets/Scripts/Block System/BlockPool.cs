@@ -65,10 +65,12 @@ namespace Game.BlockSystem
 
         public void ReturnToPool(MovingBlock movingBlock, Material wantedColor)
         {
+            if (movingBlock == null) return;
             if (!pooledBlocks.ContainsKey(wantedColor))
             {
                 pooledBlocks.Add(wantedColor, new List<MovingBlock>());
             }
+            movingBlock.ChangeColliderActive(false);
             pooledBlocks[wantedColor].Add(movingBlock);
             movingBlock.gameObject.SetActive(false);
         }
