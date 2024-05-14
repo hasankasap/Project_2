@@ -8,6 +8,7 @@ namespace Game
     public class CharacterController : MonoBehaviour
     {
         [SerializeField] private CharacterMovementHandler characterMovement;
+        [SerializeField] private CharacterAnimationHandler characterAnimation;
         [SerializeField] private Transform finish;
         [SerializeField] private Collider mainCol;
         [SerializeField] private CharacterSettings settings;
@@ -24,10 +25,10 @@ namespace Game
         private void Start()
         {
             characterMovement = GetComponent<CharacterMovementHandler>();
+            characterAnimation = GetComponent<CharacterAnimationHandler>();
         }
         private void StopStraightMovement(object[] obj)
         {
-
             characterMovement.StopStraightMovement();
         }
         private void StartStraightMovement(object[] obj)
@@ -37,7 +38,11 @@ namespace Game
                 Debug.LogError("Finish transform missing please check prefab !!");
                 return;
             }
-            characterMovement.StartStraightMovement(finish, settings.StraightMovementSpeed, null); // add finish action here
+            characterMovement.StartStraightMovement(finish, settings.StraightMovementSpeed, FinishAction); // add finish action here
+        }
+        private void FinishAction()
+        {
+
         }
         private void Jump(MovingBlock target)
         {
@@ -47,13 +52,21 @@ namespace Game
                 pos.z += 2f;
                 pos.y -= 5f;
                 characterMovement.StopStraightMovement();
-                characterMovement.Jump(pos, settings.FallingDuration, settings.FallingJumpHeight);
+                characterMovement.Jump(pos, settings.FallingDuration, settings.FallingJumpHeight, true);
                 mainCol.enabled = false;
             }
             else
             {
-                pos.x = target.transform.position.x;
-                characterMovement.Jump(pos, settings.JumpingHeight, settings.JumpingDuration);
+                float target_X = target.Center.x;
+                pos.x = target_X;
+                if (Mathf.Abs(target_X - transform.position.x) <= settings.JumpingThreshold)
+                {
+                    characterMovement.SideMovement(pos, settings.SideMovementSpeed);
+                }
+                else
+                {
+                    characterMovement.Jump(pos, settings.JumpingHeight, settings.JumpingDuration);
+                }
             }
         }
 
@@ -69,10 +82,6 @@ namespace Game
             {
                 // collect action
             }
-        }
-        private void OnTriggerExit(Collider other)
-        {
-            
         }
     }
 }

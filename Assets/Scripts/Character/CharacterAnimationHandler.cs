@@ -4,13 +4,21 @@ using UnityEngine;
 
 namespace Game
 {
-    [RequireComponent(typeof(Animator))]
     public class CharacterAnimationHandler : MonoBehaviour
     {
+        private Animator characterAnimator;
         void Start()
         {
-
+            characterAnimator = GetComponentInChildren<Animator>();
         }
 
+        public void PlayRunningAnimation()
+        {
+            characterAnimator.SetTrigger("Run");
+        }
+        public void PlayDancingAnimation()
+        {
+            characterAnimator.SetTrigger("Dance");
+        }
     }
 }

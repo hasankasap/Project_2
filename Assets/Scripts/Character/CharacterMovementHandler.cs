@@ -7,7 +7,7 @@ namespace Game
 {
     public class CharacterMovementHandler : MonoBehaviour
     {
-        Tween straightMovement;
+        Tween straightMovement, sideMovement;
         public Transform model;
 
         public void StartStraightMovement(Transform target, float speed, TweenCallback tweenCallback)
@@ -22,10 +22,20 @@ namespace Game
                 straightMovement=null;
             }
         }
-        public void Jump(Vector3 target, float duration, float jumpHeight = .5f)
+        public void SideMovement(Vector3 target, float speed)
         {
-            target.z += .5f;
-            Vector3 local = model.transform.InverseTransformPoint(target);
+            if (sideMovement != null)
+            {
+                sideMovement.Kill();
+            }
+            Vector3 local = transform.InverseTransformPoint(target);
+            sideMovement = model.DOLocalMoveX(local.x, speed).SetSpeedBased(true);
+        }
+        public void Jump(Vector3 target, float duration, float jumpHeight = .5f, bool jumpFront = false)
+        {
+            if (jumpFront) target.x = model.transform.position.x;
+            else target.z = model.transform.position.z;
+            Vector3 local = transform.InverseTransformPoint(target);
             model.DOLocalJump(local, jumpHeight, 1, duration);
         }
     }

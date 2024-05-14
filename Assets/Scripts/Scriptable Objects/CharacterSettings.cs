@@ -6,6 +6,8 @@ namespace Game
     public class CharacterSettings : ScriptableObject
     {
         public float StraightMovementSpeed = 1.2f;
+        public float SideMovementSpeed = 2f;
+        public float JumpingThreshold = .2f;
         public float JumpingDuration = .75f;
         public float JumpingHeight = 1f;
         public float FallingDuration = 2f;

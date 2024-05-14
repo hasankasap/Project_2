@@ -7,6 +7,7 @@ namespace Game.BlockSystem
     public class MovingBlockManager : MonoBehaviour
     {
         [SerializeField] private MovingBlockInitSettings blockSettings;
+        [SerializeField] private Transform finish;
         MovingBlock currentBlock, prevBlock;
         bool first = true;
 
@@ -18,16 +19,32 @@ namespace Game.BlockSystem
         }
 
         private int levelBlockCount = 0;
+        private int levelMaxBlockCount = 0;
 
         private void OnEnable()
         {
             EventManager.StartListening(GameEvents.MOUSE_CLICK_DOWN, OnMouseClickDown);
+            EventManager.StartListening(GameEvents.REGISTER_FIRST_BLOCK, RegisterFirstBlock);
         }
         private void OnDisable()
         {
             EventManager.StopListening(GameEvents.MOUSE_CLICK_DOWN, OnMouseClickDown);
+            EventManager.StopListening(GameEvents.REGISTER_FIRST_BLOCK, RegisterFirstBlock);
         }
-
+        private void RegisterFirstBlock(object[] obj)
+        {
+            MovingBlock targetBlock = (MovingBlock)obj[0];
+            if (targetBlock == null)
+            {
+                Debug.LogError("First block missing please check level prefab or code !!");
+                return;
+            }
+            
+            currentBlock = targetBlock;
+            currentBlock.Initialize(blockSettings.BlockWidth, blockSettings.BlockLength);
+            currentBlock.ChangeColliderActive(true);
+            CallNewBlock();
+        }
         private void OnMouseClickDown(object[] obj)
         {
             levelBlockCount++;
@@ -37,11 +54,13 @@ namespace Game.BlockSystem
             if (first)
             {
                 EventManager.TriggerEvent(GameEvents.START_MOVEMENT, null);
+                CalculateMaxBlockCount(currentBlock);
                 first = false;
             }
             switch (condition)
             {
                 case MatchingCondition.Perfect:
+                    prevBlock.nextBlock = currentBlock;
                     PerfectMatch();
                     CallNewBlock();
                     break;
@@ -55,23 +74,16 @@ namespace Game.BlockSystem
                     break;
             }
         }
-
-        void Start()
-        {
-            currentBlock = FindObjectOfType<MovingBlock>();
-            currentBlock.Initialize(blockSettings.BlockWidth, blockSettings.BlockLength);
-            currentBlock.ChangeColliderActive(true);
-            CallNewBlock();
-        }
         private void CallNewBlock()
         {
+            if (levelBlockCount >= levelMaxBlockCount && !first) return;
             MovingBlock newBlock = BlockPool.Instance.GetPooledBlock(blockSettings.BlockMaterials[levelBlockCount % blockSettings.BlockMaterials.Length]);
             newBlock.ChangeColliderActive(true);
             newBlock.SetWidth(currentBlock.Width);
             Vector3 pos = currentBlock.transform.position;
             pos.z += currentBlock.Length;
-            pos.x += (blockSettings.BlockWidth * 1.5f) * (Mathf.Pow(-1, levelBlockCount));
-            float targetX = pos.x + ((blockSettings.BlockWidth * 3f) * (Mathf.Pow(-1, levelBlockCount + 1)));
+            pos.x += (blockSettings.BlockWidth * blockSettings.BlockMovementStartPosMultiplier) * (Mathf.Pow(-1, levelBlockCount));
+            float targetX = pos.x + ((blockSettings.BlockWidth * blockSettings.BlockMovementStartPosMultiplier * 2) * (Mathf.Pow(-1, levelBlockCount + 1)));
             newBlock.transform.position = pos;
             prevBlock = currentBlock;
             currentBlock = newBlock;
@@ -82,11 +94,17 @@ namespace Game.BlockSystem
             Vector3 pos = currentBlock.transform.position;
             pos.x = prevBlock.transform.position.x;
             currentBlock.transform.position = pos;
+            currentBlock.Center = pos;
             // TODO: call sound and vfx here
         }
         private void DropCurrentBlock()
         {
             currentBlock.transform.DOMoveY(-20, 10).SetSpeedBased(true).SetRelative(true);
+        }
+        private void CalculateMaxBlockCount(MovingBlock firstBlock)
+        {
+            float levelLength = Mathf.Abs(finish.transform.position.z - firstBlock.Center.z);
+            levelMaxBlockCount = Mathf.CeilToInt(levelLength / blockSettings.BlockLength);
         }
         private MatchingCondition GetBlockMatchingType(BlocksEdges blocksEdges)
         {

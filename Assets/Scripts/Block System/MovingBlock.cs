@@ -16,6 +16,12 @@ namespace Game.BlockSystem
         [SerializeField] private GameObject blockModel;
         [SerializeField] private Renderer blockRenderer;
         [SerializeField] private BoxCollider jumpTrigger;
+        [SerializeField] private bool firstBlock;
+
+        private void Start()
+        {
+            if (firstBlock) EventManager.TriggerEvent(GameEvents.REGISTER_FIRST_BLOCK, new object[] { this });
+        }
 
         public void Initialize(float targetWidth, float targetLenth)
         {
@@ -25,10 +31,11 @@ namespace Game.BlockSystem
             Width = targetWidth;
             Length = targetLenth;
             blockModel.transform.localScale = tmpScale;
-            tmpScale.z = targetLenth * .1f;
+            tmpScale.z = .5f;
             jumpTrigger.size = tmpScale;
             Vector3 colCenter = jumpTrigger.center;
             colCenter.z = targetLenth - .1f;
+            jumpTrigger.center = colCenter;
             Center = transform.position;
         }
 
@@ -67,6 +74,7 @@ namespace Game.BlockSystem
                 blockRenderer = blockModel.GetComponentInChildren<Renderer>();
             }
             blockRenderer.material = wantedColor;
+            BlockMat = wantedColor;
         }
     }
 }

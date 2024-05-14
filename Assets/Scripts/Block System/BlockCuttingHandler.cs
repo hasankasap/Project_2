@@ -55,7 +55,7 @@ namespace Game.BlockSystem
             tmpCenter.z = blockCuttingInfo.MainLeft.z;
             CreateCuttedPart(tmpCenter, cuttedWidth, movingBlock.BlockMat);
         }
-        private void CreateCuttedPart(Vector3 center, float wantedWidth, Material wantedColor, float delay = 0)
+        private void CreateCuttedPart(Vector3 center, float wantedWidth, Material wantedColor)
         {
             MovingBlock movingBlock = BlockPool.Instance.GetPooledBlock(wantedColor);
             movingBlock.transform.position = center;

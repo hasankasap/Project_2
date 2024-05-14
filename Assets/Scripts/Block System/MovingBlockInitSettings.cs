@@ -11,6 +11,7 @@ namespace Game.BlockSystem
         public float BlockSpeed;
         public float BlockWidth;
         public float BlockLength;
+        public float BlockMovementStartPosMultiplier = 1.25f;
 
         public Material[] BlockMaterials;
     }
