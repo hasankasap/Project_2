@@ -34,6 +34,7 @@ namespace Game
         {
             public Sound SoundType;
             public AudioSource SoundSource;
+            public float InitPitch { get; private set; }
             [HideInInspector] public SoundData SoundData;
 
             public CreatedSound(SoundData s)
@@ -42,21 +43,21 @@ namespace Game
                 GameObject obj = new GameObject("New Sound", typeof(AudioSource));
                 obj.transform.parent = Camera.main.transform;
                 SoundSource = obj.GetComponent<AudioSource>();
-                SoundType = s.soundType;
+                SoundType = s.SoundType;
                 UpdateVariables();
-
+                InitPitch = SoundSource.pitch;
             }
             public void UpdateVariables()
             {
-                SoundSource.loop = SoundData.loop;
-                SoundSource.playOnAwake = SoundData.playOnAwake;
+                SoundSource.loop = SoundData.Loop;
+                SoundSource.playOnAwake = SoundData.PlayOnAwake;
                 SoundSource.clip = SoundData.Clip;
-                SoundSource.priority = SoundData.priorty;
-                SoundSource.volume = SoundData.volume;
-                SoundSource.pitch = SoundData.pitch;
-                SoundSource.panStereo = SoundData.streoPan;
-                SoundSource.spatialBlend = SoundData.spatialBlend;
-                SoundSource.reverbZoneMix = SoundData.reverbZoneMix;
+                SoundSource.priority = SoundData.Priorty;
+                SoundSource.volume = SoundData.Volume;
+                SoundSource.pitch = SoundData.Pitch;
+                SoundSource.panStereo = SoundData.StreoPan;
+                SoundSource.spatialBlend = SoundData.SpatialBlend;
+                SoundSource.reverbZoneMix = SoundData.ReverbZoneMix;
             }
         }
 
@@ -88,7 +89,7 @@ namespace Game
             }
         }
 
-        public static void PlaySound(Sound soundType)
+        public static void PlaySound(Sound soundType, bool changePitch, bool resetPitch)
         {
             if (Instance != null)
             {
@@ -98,9 +99,16 @@ namespace Game
                 // Check if the soundData is not null and the associated AudioSource is not null
                 if (sound != null && sound.SoundSource != null)
                 {
+                    if (sound.SoundData.UpdateOnPlayMode)
+                        sound.UpdateVariables();
 
-                    sound.UpdateVariables();
+                    if (resetPitch)
+                        sound.SoundSource.pitch = sound.InitPitch;
+
                     sound.SoundSource.Play();
+
+                    if (changePitch && sound.SoundSource.pitch > sound.SoundData.MinPitch && sound.SoundSource.pitch < sound.SoundData.MaxPitch)
+                        sound.SoundSource.pitch += sound.SoundData.PitchChange;
                 }
                 else
                 {
