@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b111fc27a5148884eafe36c86671a650, type: 3}
   m_Name: CharacterSettings
   m_EditorClassIdentifier: 
-  StraightMovementSpeed: 1.2
+  StraightMovementSpeed: 5
+  SideMovementSpeed: 4
+  JumpingThreshold: 0.5
   JumpingDuration: 0.75
   JumpingHeight: 1
   FallingDuration: 2

@@ -47,6 +47,7 @@ namespace Game.BlockSystem
         }
         private void OnMouseClickDown(object[] obj)
         {
+            if (levelBlockCount >= levelMaxBlockCount && !first) return;
             levelBlockCount++;
             BlocksEdges blocksEdges = new BlocksEdges(currentBlock, prevBlock);
             MatchingCondition condition = GetBlockMatchingType(blocksEdges);

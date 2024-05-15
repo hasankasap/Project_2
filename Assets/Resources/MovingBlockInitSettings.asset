@@ -12,11 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a91e8f3923e26147a47e2aeec83e3e4, type: 3}
   m_Name: MovingBlockInitSettings
   m_EditorClassIdentifier: 
-  PerfectMatchingThreshold: 0.019
   BlockPrefab: {fileID: 2134597996880890125, guid: c5dc5d843d257ab47b866b309c1c97da, type: 3}
-  BlockSpeed: 3
+  BlockSpeed: 7
   BlockWidth: 4
-  BlockLength: 3
+  BlockLength: 6
+  BlockMovementStartPosMultiplier: 1.2
+  PerfectMatchingThreshold: 0.13
+  PerfectMatchBlockToGrow: 2
+  GrowRatio: 0.2
+  GrowDuration: 0.5
   BlockMaterials:
   - {fileID: 2100000, guid: 5b25cd95e3901d24f89b00fa0a88cf4c, type: 2}
   - {fileID: 2100000, guid: d1e7205df0c8b0142bf4385f4199ab2c, type: 2}

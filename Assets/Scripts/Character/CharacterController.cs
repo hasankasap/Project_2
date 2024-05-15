@@ -13,6 +13,7 @@ namespace Game
         [SerializeField] private Collider mainCol;
         [SerializeField] private CharacterSettings settings;
         [SerializeField] private Transform model;
+        [SerializeField] private GameObject finishCam;
         private void OnEnable()
         {
             EventManager.StartListening(GameEvents.START_MOVEMENT, StartStraightMovement);
@@ -43,7 +44,8 @@ namespace Game
         }
         private void FinishAction()
         {
-
+            characterAnimation.PlayDancingAnimation();
+            finishCam.SetActive(true);
         }
         private void Jump(MovingBlock target)
         {

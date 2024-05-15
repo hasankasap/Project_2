@@ -12,14 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c5621ab2cf15f942aa1b55f4e66f585, type: 3}
   m_Name: SoundData
   m_EditorClassIdentifier: 
-  soundType: 0
-  clips: []
-  pickRandom: 0
-  loop: 0
-  playOnAwake: 0
-  priorty: 128
-  volume: 1
-  pitch: 1
-  streoPan: 0
-  spatialBlend: 0
-  reverbZoneMix: 1
+  UpdateOnPlayMode: 0
+  SoundType: 0
+  Clips:
+  - {fileID: 8300000, guid: 8abe67c43c784b442ad3ba7a82e3eaf8, type: 3}
+  PickRandom: 0
+  Loop: 0
+  PlayOnAwake: 0
+  Priorty: 128
+  Volume: 1
+  Pitch: 1
+  StreoPan: 0
+  SpatialBlend: 0
+  ReverbZoneMix: 1
+  PitchChange: 0.11
+  MinPitch: -3
+  MaxPitch: 2
