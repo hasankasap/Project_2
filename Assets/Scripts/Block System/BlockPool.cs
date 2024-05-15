@@ -4,31 +4,17 @@ using UnityEngine;
 
 namespace Game.BlockSystem
 {
-    public class BlockPool : MonoBehaviour
+    public class BlockPool : Singleton<BlockPool>
     {
-        private static BlockPool eventManager;
-
-        public static BlockPool Instance
-        {
-            get
-            {
-                if (!eventManager)
-                {
-                    eventManager = FindObjectOfType(typeof(BlockPool)) as BlockPool;
-
-                    if (!eventManager)
-                    {
-                        Debug.LogError("There needs to be one active EventManger script on a GameObject in your scene.");
-                    }
-                }
-
-                return eventManager;
-            }
-        }
 
         private Dictionary<Material, List<MovingBlock>> pooledBlocks = new Dictionary<Material, List<MovingBlock>>();
 
         [SerializeField] private MovingBlockInitSettings settings;
+
+        private void Awake()
+        {
+            instance = this;
+        }
 
         public MovingBlock GetPooledBlock(Material wantedColor)
         {
