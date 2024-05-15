@@ -38,7 +38,19 @@ namespace Game.BlockSystem
             jumpTrigger.center = colCenter;
             Center = transform.position;
         }
+        public void Grow(float widthChange, float growDuration, float referancePos)
+        {
+            Width += widthChange;
+            blockModel.transform.DOScaleX(Width, growDuration);
 
+            if (Center.x < referancePos)
+                Center.x += widthChange / 2;
+            else if (Center.x > referancePos)
+                Center.x -= widthChange / 2;
+            else return;
+
+            transform.DOMoveX(Center.x, growDuration / 2);
+        }
         public void MoveX(float start, float end, float movementSpeed)
         {
             Vector3 oldPos = transform.position;

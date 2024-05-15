@@ -1,5 +1,4 @@
 using DG.Tweening;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Game.BlockSystem
@@ -14,12 +13,13 @@ namespace Game.BlockSystem
         enum MatchingCondition
         {
             Perfect,
-            Inside,
-            Outside
+            Match,
+            Fail
         }
 
         private int levelBlockCount = 0;
         private int levelMaxBlockCount = 0;
+        private int perfectMatchCount = 0;
 
         private void OnEnable()
         {
@@ -60,17 +60,13 @@ namespace Game.BlockSystem
             switch (condition)
             {
                 case MatchingCondition.Perfect:
-                    prevBlock.nextBlock = currentBlock;
                     PerfectMatch();
-                    CallNewBlock();
                     break;
-                case MatchingCondition.Inside:
-                    prevBlock.nextBlock = currentBlock;
-                    EventManager.TriggerEvent(GameEvents.CUT_BLOCK, new object[] { currentBlock, blocksEdges });
-                    CallNewBlock();
+                case MatchingCondition.Match:
+                    Match(blocksEdges);
                     break;
-                case MatchingCondition.Outside:
-                    DropCurrentBlock();
+                case MatchingCondition.Fail:
+                    Fail();
                     break;
             }
         }
@@ -91,11 +87,30 @@ namespace Game.BlockSystem
         }
         private void PerfectMatch()
         {
+            prevBlock.nextBlock = currentBlock;
             Vector3 pos = currentBlock.transform.position;
             pos.x = prevBlock.transform.position.x;
             currentBlock.transform.position = pos;
             currentBlock.Center = pos;
-            // TODO: call sound and vfx here
+            perfectMatchCount++;
+            if (perfectMatchCount >= blockSettings.PerfectMatchBlockToGrow && currentBlock.Width < blockSettings.BlockWidth)
+            { 
+                currentBlock.Grow(blockSettings.BlockWidth * blockSettings.GrowRatio, blockSettings.GrowDuration, finish.position.x);
+            }
+            CallNewBlock();
+            AudioManager.PlaySound(Sound.PerfectMatch, true, false);
+        }
+        private void Match(BlocksEdges blocksEdges)
+        {
+            prevBlock.nextBlock = currentBlock;
+            EventManager.TriggerEvent(GameEvents.CUT_BLOCK, new object[] { currentBlock, blocksEdges });
+            CallNewBlock();
+            AudioManager.PlaySound(Sound.PerfectMatch, false, true);
+            perfectMatchCount = 0;
+        }
+        private void Fail()
+        {
+            DropCurrentBlock();
         }
         private void DropCurrentBlock()
         {
@@ -111,7 +126,7 @@ namespace Game.BlockSystem
             if (prevBlock == null || currentBlock == null)
             {
                 Debug.LogError("Block referances missing please debug!!");
-                return MatchingCondition.Outside;
+                return MatchingCondition.Fail;
             }
             float dist = Mathf.Abs(blocksEdges.MainLeft.x - blocksEdges.PrevLeft.x);
             float insideDist = (currentBlock.Width * (1 - blockSettings.PerfectMatchingThreshold));
@@ -122,10 +137,10 @@ namespace Game.BlockSystem
             }
             else if (dist < insideDist && (blocksEdges.MainLeft.x > blocksEdges.PrevLeft.x || blocksEdges.MainRight.x < blocksEdges.PrevRight.x))
             {
-                return MatchingCondition.Inside;
+                return MatchingCondition.Match;
             }
 
-            return MatchingCondition.Outside;
+            return MatchingCondition.Fail;
         }
     }
 }

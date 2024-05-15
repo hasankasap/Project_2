@@ -12,6 +12,7 @@ namespace Game
         [SerializeField] private Transform finish;
         [SerializeField] private Collider mainCol;
         [SerializeField] private CharacterSettings settings;
+        [SerializeField] private Transform model;
         private void OnEnable()
         {
             EventManager.StartListening(GameEvents.START_MOVEMENT, StartStraightMovement);
@@ -59,7 +60,7 @@ namespace Game
             {
                 float target_X = target.Center.x;
                 pos.x = target_X;
-                if (Mathf.Abs(target_X - transform.position.x) <= settings.JumpingThreshold)
+                if (Mathf.Abs(target_X - model.transform.position.x) <= settings.JumpingThreshold)
                 {
                     characterMovement.SideMovement(pos, settings.SideMovementSpeed);
                 }

@@ -35,6 +35,8 @@ namespace Game
             public Sound SoundType;
             public AudioSource SoundSource;
             public float InitPitch { get; private set; }
+
+            public bool OnInitPitch = true;
             [HideInInspector] public SoundData SoundData;
 
             public CreatedSound(SoundData s)
@@ -102,13 +104,21 @@ namespace Game
                     if (sound.SoundData.UpdateOnPlayMode)
                         sound.UpdateVariables();
 
-                    if (resetPitch)
+                    if (resetPitch && !sound.OnInitPitch)
+                    {
                         sound.SoundSource.pitch = sound.InitPitch;
+                        sound.OnInitPitch = true;
+                    }
+                        
 
                     sound.SoundSource.Play();
 
                     if (changePitch && sound.SoundSource.pitch > sound.SoundData.MinPitch && sound.SoundSource.pitch < sound.SoundData.MaxPitch)
+                    {
                         sound.SoundSource.pitch += sound.SoundData.PitchChange;
+                        sound.OnInitPitch = false;
+                    }
+                        
                 }
                 else
                 {
