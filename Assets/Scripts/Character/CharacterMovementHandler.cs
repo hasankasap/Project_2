@@ -31,12 +31,12 @@ namespace Game
             Vector3 local = transform.InverseTransformPoint(target);
             sideMovement = model.DOLocalMoveX(local.x, speed).SetSpeedBased(true);
         }
-        public void Jump(Vector3 target, float duration, float jumpHeight = .5f, bool jumpFront = false)
+        public void Jump(Vector3 target, float duration, float jumpHeight = .5f, bool jumpFront = false, TweenCallback onComplete = null)
         {
             if (jumpFront) target.x = model.transform.position.x;
             else target.z = model.transform.position.z;
             Vector3 local = transform.InverseTransformPoint(target);
-            model.DOLocalJump(local, jumpHeight, 1, duration);
+            model.DOLocalJump(local, jumpHeight, 1, duration).OnComplete(onComplete);
         }
     }
 }

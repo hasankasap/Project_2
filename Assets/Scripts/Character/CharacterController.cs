@@ -55,7 +55,7 @@ namespace Game
                 pos.z += 2f;
                 pos.y -= 5f;
                 characterMovement.StopStraightMovement();
-                characterMovement.Jump(pos, settings.FallingDuration, settings.FallingJumpHeight, true);
+                characterMovement.Jump(pos, settings.FallingDuration, settings.FallingJumpHeight, true, ()=> model.gameObject.SetActive(false));
                 mainCol.enabled = false;
             }
             else
