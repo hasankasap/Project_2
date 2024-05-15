@@ -16,13 +16,25 @@ namespace Game.BlockSystem
         [SerializeField] private GameObject blockModel;
         [SerializeField] private Renderer blockRenderer;
         [SerializeField] private BoxCollider jumpTrigger;
-        [SerializeField] private bool firstBlock;
 
-        private void Start()
+        private void OnEnable()
         {
-            if (firstBlock) EventManager.TriggerEvent(GameEvents.REGISTER_FIRST_BLOCK, new object[] { this });
+            EventManager.StartListening(GameEvents.BLOCK_RETURN_POOL, OnReturnPool);
         }
+        private void OnDisable()
+        {
+            EventManager.StopListening(GameEvents.BLOCK_RETURN_POOL, OnReturnPool);
+            
+        }
+        public void OnReturnPool(object[] obj)
+        {
+            float referance_Z = (float)obj[0];
 
+            if (referance_Z - (Length * 2)>= transform.position.z)
+            {
+                BlockPool.Instance.ReturnToPool(this, BlockMat);
+            }
+        }
         public void Initialize(float targetWidth, float targetLenth)
         {
             Vector3 tmpScale = blockModel.transform.localScale;

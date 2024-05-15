@@ -8,7 +8,7 @@ namespace Game.BlockSystem
         [SerializeField] private MovingBlockInitSettings blockSettings;
         [SerializeField] private Transform finish;
         MovingBlock currentBlock, prevBlock;
-        bool first = true;
+        bool first = true, canCut = true;
 
         enum MatchingCondition
         {
@@ -24,22 +24,51 @@ namespace Game.BlockSystem
         private void OnEnable()
         {
             EventManager.StartListening(GameEvents.MOUSE_CLICK_DOWN, OnMouseClickDown);
-            EventManager.StartListening(GameEvents.REGISTER_FIRST_BLOCK, RegisterFirstBlock);
+            EventManager.StartListening(GameEvents.LEVEL_CREATED, OnLevelCreated);
+            EventManager.StartListening(GameEvents.CONTINUE_GAME, OnContinue);
         }
         private void OnDisable()
         {
             EventManager.StopListening(GameEvents.MOUSE_CLICK_DOWN, OnMouseClickDown);
-            EventManager.StopListening(GameEvents.REGISTER_FIRST_BLOCK, RegisterFirstBlock);
+            EventManager.StopListening(GameEvents.LEVEL_CREATED, OnLevelCreated);
+            EventManager.StopListening(GameEvents.CONTINUE_GAME, OnContinue);
         }
-        private void RegisterFirstBlock(object[] obj)
+        private void OnLevelCreated(object[] obj)
         {
-            MovingBlock targetBlock = (MovingBlock)obj[0];
+            Level level = (Level)obj[0];
+            if (level == null)
+            {
+                Debug.LogError("Level missing please check code or prefab !!");
+                return;
+            }
+            finish = level.Finish;
+            if (level.FirstBlock != null)
+            {
+                RegisterFirstBlock(level.FirstBlock);
+            }
+            else
+            {
+                canCut = false;
+            }
+            CalculateMaxBlockCount(currentBlock);
+        }
+        private void OnContinue(object[] obj)
+        {
+            levelBlockCount = 0;
+            first = true;
+            float initWidthDif = Mathf.Abs(blockSettings.BlockWidth - currentBlock.Width);
+            if (initWidthDif > 0)
+                currentBlock.Grow(initWidthDif, .2f, finish.position.x);
+            CallNewBlock();
+            EventManager.TriggerEvent(GameEvents.BLOCK_RETURN_POOL, new object[] { Camera.main.transform.position.z});
+        }
+        private void RegisterFirstBlock(MovingBlock targetBlock)
+        {
             if (targetBlock == null)
             {
                 Debug.LogError("First block missing please check level prefab or code !!");
                 return;
             }
-            
             currentBlock = targetBlock;
             currentBlock.Initialize(blockSettings.BlockWidth, blockSettings.BlockLength);
             currentBlock.ChangeColliderActive(true);
@@ -47,7 +76,11 @@ namespace Game.BlockSystem
         }
         private void OnMouseClickDown(object[] obj)
         {
-            if (levelBlockCount >= levelMaxBlockCount && !first) return;
+            if ((levelBlockCount >= levelMaxBlockCount - 1 && !first) || !canCut)
+            {
+                canCut = true;
+                return;
+            }
             levelBlockCount++;
             BlocksEdges blocksEdges = new BlocksEdges(currentBlock, prevBlock);
             MatchingCondition condition = GetBlockMatchingType(blocksEdges);
@@ -55,7 +88,6 @@ namespace Game.BlockSystem
             if (first)
             {
                 EventManager.TriggerEvent(GameEvents.START_MOVEMENT, null);
-                CalculateMaxBlockCount(currentBlock);
                 first = false;
             }
             switch (condition)
@@ -73,7 +105,7 @@ namespace Game.BlockSystem
         }
         private void CallNewBlock()
         {
-            if (levelBlockCount >= levelMaxBlockCount && !first) return;
+            if (levelBlockCount >= levelMaxBlockCount - 1 && !first) return;
             MovingBlock newBlock = BlockPool.Instance.GetPooledBlock(blockSettings.BlockMaterials[levelBlockCount % blockSettings.BlockMaterials.Length]);
             newBlock.ChangeColliderActive(true);
             newBlock.SetWidth(currentBlock.Width);
@@ -119,7 +151,7 @@ namespace Game.BlockSystem
         }
         private void CalculateMaxBlockCount(MovingBlock firstBlock)
         {
-            float levelLength = Mathf.Abs(finish.transform.position.z - firstBlock.Center.z);
+            float levelLength = Mathf.Abs((finish.transform.position.z + (blockSettings.BlockLength * .1f)) - firstBlock.Center.z);
             levelMaxBlockCount = Mathf.CeilToInt(levelLength / blockSettings.BlockLength);
         }
         private MatchingCondition GetBlockMatchingType(BlocksEdges blocksEdges)

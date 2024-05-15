@@ -11,14 +11,15 @@ namespace Game
         {
             characterAnimator = GetComponentInChildren<Animator>();
         }
-
         public void PlayRunningAnimation()
         {
-            characterAnimator.SetTrigger("Run");
+            if (!characterAnimator.GetCurrentAnimatorStateInfo(0).IsName("Run"))
+                characterAnimator.SetTrigger("Run");
         }
         public void PlayDancingAnimation()
         {
-            characterAnimator.SetTrigger("Dance");
+            if (!characterAnimator.GetCurrentAnimatorStateInfo(0).IsName("Dance"))
+                characterAnimator.SetTrigger("Dance");
         }
     }
 }
